@@ -74,7 +74,7 @@ def get_geolocation(city):
             print(data)  # Print the data to see the results
             return data
         else:
-            print(f"Error: {response.status_code}")
+            st.error(f"Error: {response.status_code}")
 
 
 def get_coords(loc_data):
@@ -167,11 +167,14 @@ def show_extra(extra):
             cols[n].write(f'{extra[i]}')
 
 def show_icons(df):
+    df['date_weather'] = df['date_time'].apply(lambda date: date.strftime('%a, %b-%d'))
+    df['time_weather'] = df['date_time'].apply(lambda date: date.strftime('%H:%M'))
     with st.container(border=True):
         with st.spinner('Retrieving weather conditions...'):
             cols = st.columns(10)
             for n,col in enumerate(cols):
-                col.write(df.loc[n,'date_time'].time())
+                col.write(df.loc[n,'date_weather'])
+                col.write(df.loc[n,'time_weather'])
                 col.write(df.loc[n,'weather_conds'])
                 col.write(df.loc[n,'icons'])
     
@@ -201,9 +204,12 @@ if __name__ == "__main__":
     city = main_menu()
     if city != '':
         loc_data = get_geolocation(city)
-        coords = get_coords(loc_data)
-        latitude, longitude = select_coords(coords)
-        data = weather_api(latitude, longitude)
-        show_data(data)
+        if loc_data==[]:
+            st.error('The input city was not found.')
+        else:
+            coords = get_coords(loc_data)
+            latitude, longitude = select_coords(coords)
+            data = weather_api(latitude, longitude)
+            show_data(data)
 
 
