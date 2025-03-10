@@ -5,6 +5,10 @@ import pandas as pd
 import plotly.express as px
 from dotenv import load_dotenv
 import os
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+from PIL import Image
+import io
 
 
 load_dotenv()
@@ -128,8 +132,14 @@ def transform_data(data):
     local_sunset = sunset + timezone_offset
     extra = {'sunrise':local_sunrise.time(),
              'sunset':local_sunset.time(),
-             'timezone':f'UTC{hours}',
+             'timezone':f'UTC{hours}' if hours<0 else f'UTC+{hours}',
              'country':country}
+    icons = df_data['weather_icons'].unique()
+    icon_dict = {}
+    for icon in icons:
+        icon_dict[icon] = get_icon_image(icon)
+    df_data['icons'] = df_data['weather_icons'].map(icon_dict)
+    df_data['formatted_date'] = formatted_date
     return df_data, extra
 
 def show_templine_plot(df):
@@ -137,7 +147,7 @@ def show_templine_plot(df):
     fig = px.line(df1, x='date_time', y=['Min Temp','Max Temp','Feels-like Temp'], title="Temperature")
     fig.update_layout(
         xaxis_title='Date Time',  # Change X axis label
-        yaxis_title='',   # Change Y axis label
+        yaxis_title='°C',   # Change Y axis label
     )
     st.plotly_chart(fig)
 
@@ -149,17 +159,43 @@ def show_humidity_plot(df):
     )
     st.plotly_chart(fig)
 
-def show_data(data):
-    st.write('#### 5-day forecast')
-    df,extra = transform_data(data)
+def show_extra(extra):
     cols = st.columns(len(extra.keys()))
     for n,i in enumerate(extra.keys()):
-        with st.container(border=True):
+        with cols[n].container(border=True):
             cols[n].write(f'#### {i.capitalize()}')
             cols[n].write(f'{extra[i]}')
-    show_templine_plot(df)
-    show_humidity_plot(df)
+
+def show_icons(df):
+    with st.container(border=True):
+        with st.spinner('Retrieving weather conditions...'):
+            cols = st.columns(10)
+            for n,col in enumerate(cols):
+                col.write(df.loc[n,'date_time'].time())
+                col.write(df.loc[n,'weather_conds'])
+                col.write(df.loc[n,'icons'])
     
+
+def show_data(data):
+    with st.spinner('Loading plots...'):
+        st.write('#### 5-day forecast')
+        df,extra = transform_data(data)
+        show_extra(extra)
+        show_templine_plot(df)
+        show_icons(df)
+        show_humidity_plot(df)
+
+
+def get_icon_image(icon_code):
+    icon_url = f"https://openweathermap.org/img/wn/{icon_code}@2x.png" 
+    response = requests.get(icon_url)
+    if response.status_code == 200:
+        img = Image.open(io.BytesIO(response.content))
+        return img
+    else:
+        print(f"Failed to fetch icon for {icon_code}")
+        return None
+
 
 if __name__ == "__main__":
     city = main_menu()
