@@ -38,15 +38,15 @@ To use Weather Tracker, follow these steps:
 
 > git clone https://github.com/Gabrielazmbr/OpenWeatherAPI.git
 
-1. Navigate to the project directory:
+2. Navigate to the project directory:
 
 > OpenWeatherAPI
 
-1. Install dependencies:
+3. Install dependencies:
 
 > pip install -r requirements.txt
 
-1. Run the application:
+4. Run the application:
 
 > streamlit run app.py
 
