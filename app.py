@@ -3,16 +3,12 @@ import requests
 from datetime import datetime, timedelta
 import pandas as pd
 import plotly.express as px
-from dotenv import load_dotenv
 import os
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from PIL import Image
 import io
 
-
-load_dotenv()
-api_key = os.getenv('API_KEY')
 
 st.set_page_config(layout='wide',
                    page_title = 'Real-Time OpenWeather API data')
@@ -28,9 +24,10 @@ def main_menu():
         st.write()
         sidebar.info('Enter a city to begin.')
     st.write(f'## {city.capitalize()}')
-    return city
+    api_key = sidebar.text_input('API KEY', type='password')
+    return city, api_key
 
-def weather_api(latitude, longitude):
+def weather_api(latitude, longitude, api_key):
     # GeoCoding API
     # Define the API URL with the query parameters
     with st.spinner('Getting weather data...'):
@@ -53,7 +50,7 @@ def weather_api(latitude, longitude):
         else:
             print(f"Error: {response.status_code}")
 
-def get_geolocation(city):
+def get_geolocation(city, api_key):
     # GeoCoding API
     # Define the API URL with the query parameters
     with st.spinner('getting geolocation'):
@@ -201,15 +198,15 @@ def get_icon_image(icon_code):
 
 
 if __name__ == "__main__":
-    city = main_menu()
-    if city != '':
-        loc_data = get_geolocation(city)
+    city, api_key = main_menu()
+    if city != '' and api_key !='':
+        loc_data = get_geolocation(city, api_key)
         if loc_data==[]:
             st.error('The input city was not found.')
         else:
             coords = get_coords(loc_data)
             latitude, longitude = select_coords(coords)
-            data = weather_api(latitude, longitude)
+            data = weather_api(latitude, longitude, api_key)
             show_data(data)
 
 
