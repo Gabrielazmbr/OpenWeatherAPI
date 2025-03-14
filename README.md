@@ -53,6 +53,7 @@ To use Weather Tracker, follow these steps:
 ## Usage
 
 - Run the program and enter the name of a city.
+- Input the API KEY in the main manu.
 
 - Select the desired city from the search results.
 
