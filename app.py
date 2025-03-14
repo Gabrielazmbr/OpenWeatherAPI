@@ -3,9 +3,6 @@ import requests
 from datetime import datetime, timedelta
 import pandas as pd
 import plotly.express as px
-import os
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 from PIL import Image
 import io
 
